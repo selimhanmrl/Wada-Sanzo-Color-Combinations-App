@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palette Stylist</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Palette Stylist</h1>
+        <p>Click a color to build your perfect outfit palette.</p>
+    </header>
+
+    <main>
+        <h2>Your Color Closet</h2>
+        <div id="color-closet-grid" class="color-grid"></div>
+        
+        <!-- Modal Popup for combinations -->
+        <div id="combinations-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="selected-color-header">
+                        <h2>Perfect Combinations with <span id="selected-color-name"></span></h2>
+                        <p>Click on any combination to explore more matching colors</p>
+                    </div>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div id="combinations-grid" class="color-grid"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

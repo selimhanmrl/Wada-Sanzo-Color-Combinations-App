@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outfit Color Analyzer - Wada Sanzo Color Combinations</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="analyzer.css">
+</head>
+<body>
+    <header>
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">Color Combinations</a>
+            <a href="analyzer.html" class="nav-link active">Outfit Analyzer</a>
+        </nav>
+        <h1>Outfit Color Analyzer</h1>
+        <p class="header-description">Upload your clothing image to get color combination recommendations</p>
+    </header>
+
+    <main>
+        <div class="analyzer-container">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    <div class="upload-placeholder">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2v-7"/>
+                            <path d="M17 7l-5-5-5 5"/>
+                            <line x1="12" y1="2" x2="12" y2="15"/>
+                        </svg>
+                        <p>Drop your image here or click to upload</p>
+                        <span class="upload-tip">Supported formats: JPG, PNG</span>
+                    </div>
+                    <img id="previewImage" class="hidden">
+                </div>
+                <button id="analyzeButton" class="analyze-btn" disabled>Analyze Colors</button>
+            </div>
+
+            <div class="results-section hidden" id="resultsSection">
+                <div class="detected-colors">
+                    <h2>Detected Colors</h2>
+                    <div id="detectedColorsList" class="color-list"></div>
+                </div>
+                
+                <div class="recommended-combinations">
+                    <h2>Recommended Combinations</h2>
+                    <div id="recommendationsList" class="combinations-grid"></div>
+                </div>
+            </div>
+
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Analyzing your image...</p>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="analyzer.js"></script>
+</body>
+</html>
