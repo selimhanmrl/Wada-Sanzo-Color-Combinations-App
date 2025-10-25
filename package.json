@@ -1,0 +1,34 @@
+{
+  "name": "wada-sanzo-color-app",
+  "version": "1.0.0",
+  "description": "Wada Sanzo Color Combinations App",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "build": "node build-minify.js",
+    "build:watch": "nodemon --watch app.js --watch analyzer.js --watch server.js --watch js/ --exec \"node build-minify.js\"",
+    "prod": "npm run build && NODE_ENV=production node server.js",
+    "docker:build": "docker build -t wada-sanzo-app .",
+    "docker:run": "docker run -p 8080:8080 --env-file .env wada-sanzo-app",
+    "docker:compose:up": "docker-compose up -d",
+    "docker:compose:down": "docker-compose down",
+    "docker:compose:logs": "docker-compose logs -f"
+  },
+  "dependencies": {
+    "connect-redis": "^9.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-session": "^1.18.2",
+    "node-fetch": "^3.3.2",
+    "pg": "^8.16.3",
+    "redis": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "terser": "^5.44.0"
+  }
+}

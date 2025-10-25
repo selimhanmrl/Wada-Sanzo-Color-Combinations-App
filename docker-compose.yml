@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  wada-app:
+    build: .
+    container_name: wada-app
+    ports:
+      - "80:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+
+    volumes:
+      - ./generated:/app/generated
+    depends_on:
+      - redis
+      - postgres
+    restart: unless-stopped
+    networks:
+      - wada-net
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - /home/yav/redisData:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - wada-net
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      - POSTGRES_USER=wada
+      - POSTGRES_PASSWORD=asdf
+      - POSTGRES_DB=wadaStats
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgreData:/var/lib/postgresql/data
+    networks:
+      - wada-net
+    restart: unless-stopped
+
+networks:
+  wada-net:
+    driver: bridge

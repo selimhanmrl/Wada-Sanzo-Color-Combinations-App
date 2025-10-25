@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - Wada Sanzo</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="analyzer.css">
+    <style>
+        .search-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #faf8f5 0%, #f5f3f0 100%);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: #2c2c2c;
+        }
+
+        /* 2. FIXED: Dramatically reduced header height with warm color scheme */
+        .search-header {
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            color: #2c2c2c;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            margin: 20px;
+        }
+
+        .search-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        .search-header h1 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            color: #2c2c2c;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .search-header p {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin: 5px 0 0 0;
+            letter-spacing: 0.02em;
+        }
+
+        .search-info {
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            margin: 20px auto;
+            max-width: 1200px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+
+        .search-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        .search-info h2 {
+            color: #2c2c2c;
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .search-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+            font-style: italic;
+        }
+
+        .loading-section {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            margin: 20px auto;
+            max-width: 1200px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+
+        .loading-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #8B4513;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #2c2c2c;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .loading-section p {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        .search-results {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        .gender-info {
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gender-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 2s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .gender-info h2 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 3. FIXED: Simplified card layout - no more card-in-card */
+        .item-group {
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+        }
+
+        .item-group::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        /* 4. FIXED: Static header, no cursor */
+        .item-title {
+            color: #2c2c2c;
+            margin: 0 0 15px 0;
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+
+        .item-details {
+            background: linear-gradient(135deg, #f8f6f3 0%, #f0ede8 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 3px solid #8B4513;
+        }
+
+        .item-details p {
+            margin: 8px 0;
+            color: #555;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .item-details strong {
+            color: #8B4513;
+            font-weight: 600;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .site-results {
+            margin-top: 15px;
+        }
+
+        .site-results h3 {
+            color: #2c2c2c;
+            margin: 0 0 15px 0;
+            font-size: 1.1rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        /* 3. FIXED: Simplified site results - no more nested cards */
+        .site-result {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .site-result:last-child {
+            border-bottom: none;
+        }
+
+        .site-result h4 {
+            color: #2c2c2c;
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        .site-result h4::before {
+            content: '🏪';
+            font-size: 0.9rem;
+        }
+
+        .search-query-display {
+            background: #f8f6f3;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 8px 0;
+            border-left: 3px solid #8B4513;
+        }
+
+        .search-query-display small {
+            color: #8B4513;
+            font-size: 0.75rem;
+            font-weight: 500;
+            word-break: break-all;
+            line-height: 1.3;
+        }
+
+        /* 4. FIXED: Removed search query display - it was clutter */
+        .site-result .search-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 400;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-result .search-link::before {
+            content: '🔍';
+            font-size: 0.8rem;
+        }
+
+        .site-result .search-link::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .site-result .search-link:hover::after {
+            left: 100%;
+        }
+
+        .site-result .search-link:hover {
+            background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            margin: 20px auto;
+            max-width: 1200px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            color: #666;
+            position: relative;
+        }
+
+        .no-results::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        .no-results h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #2c2c2c;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .no-results p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 400;
+            font-size: 0.9rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .back-button::before {
+            content: '←';
+            font-size: 1rem;
+        }
+
+        .back-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .back-button:hover::after {
+            left: 100%;
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #A0522D 0%, #8B4513 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.4);
+        }
+
+        .suggestion {
+            background: linear-gradient(135deg, #f8f6f3 0%, #f0ede8 100%);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 3px solid #8B4513;
+        }
+
+        .suggestion p {
+            color: #8B4513;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .suggestion a {
+            color: #8B4513;
+            text-decoration: none;
+            font-weight: 500;
+            margin: 0 8px;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            border: 1px solid #8B4513;
+        }
+
+        .suggestion a:hover {
+            background: #8B4513;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+        }
+
+        /* Generated Outfit Display */
+        .generated-outfit-section {
+            background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+            margin: 20px auto;
+            max-width: 1200px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255,255,255,0.8);
+            position: relative;
+            text-align: center;
+        }
+
+        .generated-outfit-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #8B4513, #D2691E, #CD853F, #DEB887);
+        }
+
+        .generated-outfit-section h2 {
+            color: #2c2c2c;
+            margin: 0 0 15px 0;
+            font-size: 1.4rem;
+            font-weight: 300;
+            letter-spacing: 0.05em;
+        }
+
+        .generated-outfit-section p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0 0 15px 0;
+            font-style: italic;
+        }
+
+        .outfit-image-container {
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.2);
+            background: #f8f6f3;
+        }
+
+        .outfit-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Mobile Responsive Design */
+        @media (max-width: 768px) {
+            .search-page {
+                padding: 0;
+            }
+
+            .search-header {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .search-header h1 {
+                font-size: 1.5rem;
+                margin-bottom: 5px;
+            }
+
+            .search-header p {
+                font-size: 0.8rem;
+            }
+
+            /* Mobile header layout */
+            .search-header > div {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .search-header .back-button {
+                align-self: flex-start;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .search-header > div > div:last-child {
+                display: none; /* Hide spacer on mobile */
+            }
+
+            .search-info, .loading-section, .no-results {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .search-results {
+                padding: 0 10px 20px;
+            }
+
+            .item-group {
+                padding: 15px;
+                margin-bottom: 15px;
+                border-radius: 15px;
+            }
+
+            .item-title {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .site-results h3 {
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            .site-result {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 10px 0;
+            }
+
+            .site-result h4 {
+                font-size: 0.9rem;
+            }
+
+            .site-result .search-link {
+                align-self: stretch;
+                text-align: center;
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
+
+            .search-query-display {
+                padding: 6px;
+                margin: 6px 0;
+            }
+
+            .search-query-display small {
+                font-size: 0.7rem;
+            }
+
+            .generated-outfit-section {
+                margin: 10px;
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            .generated-outfit-section h2 {
+                font-size: 1.2rem;
+            }
+
+            .outfit-image-container {
+                border-radius: 10px;
+            }
+
+            .gender-info {
+                margin: 10px;
+                padding: 12px;
+                border-radius: 15px;
+            }
+
+            .gender-info h2 {
+                font-size: 1rem;
+            }
+
+            .suggestion {
+                padding: 12px;
+                margin: 10px 0;
+            }
+
+            .suggestion a {
+                display: block;
+                margin: 5px 0;
+                text-align: center;
+                padding: 8px 12px;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .search-header {
+                margin: 5px;
+                padding: 12px;
+            }
+
+            .search-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .search-header p {
+                font-size: 0.75rem;
+            }
+
+            .search-info, .loading-section, .no-results {
+                margin: 5px;
+                padding: 12px;
+            }
+
+            .generated-outfit-section {
+                margin: 5px;
+                padding: 12px;
+            }
+
+            .generated-outfit-section h2 {
+                font-size: 1.1rem;
+            }
+
+            .item-group {
+                padding: 12px;
+            }
+
+            .item-title {
+                font-size: 1.1rem;
+            }
+
+            .site-result .search-link {
+                padding: 8px 12px;
+                font-size: 0.75rem;
+            }
+
+            .back-button {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .search-header {
+                padding: 10px 15px;
+            }
+
+            .search-header h1 {
+                font-size: 1.3rem;
+            }
+
+            .search-header p {
+                font-size: 0.8rem;
+            }
+
+            .item-group {
+                padding: 12px;
+            }
+
+            .site-result {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+
+            .site-result .search-link {
+                align-self: auto;
+                padding: 6px 12px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-page">
+        <!-- 2. FIXED: Dramatically reduced header -->
+        <header class="search-header">
+            <div style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto;">
+                <a href="analyzer.html" class="back-button" style="margin: 0;">
+                    Back to Analyzer
+                </a>
+                <div style="text-align: center; flex: 1;">
+                    <h1>🔍 Search Results</h1>
+                    <p>Find similar clothing items from your outfit</p>
+                </div>
+                <div style="width: 120px;"></div> <!-- Spacer for balance -->
+            </div>
+        </header>
+
+        <!-- Generated Outfit Display -->
+        <div id="generatedOutfitSection" class="generated-outfit-section" style="display: none;">
+            <h2>👔 Your Generated Outfit</h2>
+            <p>This is the outfit we're finding similar items for</p>
+            <div class="outfit-image-container">
+                <img id="generatedOutfitImage" alt="Your Generated Outfit">
+            </div>
+        </div>
+
+        <!-- 1. FIXED: Proper state management - only show one state at a time -->
+        <div class="search-info" id="searchInfo" style="display: none;">
+            <h2 id="searchQuery">Analyzing your outfit...</h2>
+            <p id="detectedColors">Please wait while we analyze your clothing items</p>
+        </div>
+
+        <div id="loadingIndicator" class="loading-section" style="display: none;">
+            <div class="loading-spinner"></div>
+            <h2>Searching for similar items...</h2>
+            <p>This may take a few moments</p>
+        </div>
+
+        <div id="searchResults" class="search-results" style="display: none;">
+            <!-- Search results will be populated here -->
+        </div>
+
+        <div id="noResults" class="no-results" style="display: none;">
+            <h2>No Results Found</h2>
+            <p>We couldn't find any similar items for your outfit.</p>
+            <div class="suggestion">
+                <p>Try searching for:</p>
+                <a href="#" onclick="searchSuggestion('men clothing')">Men's Clothing</a>
+                <a href="#" onclick="searchSuggestion('women clothing')">Women's Clothing</a>
+                <a href="#" onclick="searchSuggestion('casual outfit')">Casual Outfit</a>
+            </div>
+            <a href="analyzer.html" class="back-button">Back to Analyzer</a>
+        </div>
+    </div>
+
+    <script>
+        // Get data from sessionStorage (primary) or URL parameters (fallback for old links)
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Try to get from sessionStorage first
+        let resultsParam = sessionStorage.getItem('searchResults');
+        let generatedImageUrl = sessionStorage.getItem('searchImageUrl');
+        
+        // Fallback to URL parameters if sessionStorage is empty (for backward compatibility)
+        if (!resultsParam) {
+            resultsParam = urlParams.get('results');
+            generatedImageUrl = urlParams.get('image') || localStorage.getItem('generatedImageUrl');
+        }
+        
+        const itemsParam = urlParams.get('items');
+        const query = urlParams.get('q') || '';
+        const colors = urlParams.get('colors') || '';
+        
+        // Display generated outfit image if available
+        if (generatedImageUrl) {
+            const outfitSection = document.getElementById('generatedOutfitSection');
+            const outfitImage = document.getElementById('generatedOutfitImage');
+            
+            outfitImage.src = generatedImageUrl;
+            outfitSection.style.display = 'block';
+            
+        }
+        
+        // 1. FIXED: Proper state management - only show one state at a time
+        function showLoadingState() {
+            document.getElementById('searchInfo').style.display = 'block';
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('noResults').style.display = 'none';
+        }
+
+        function showResultsState() {
+            document.getElementById('searchInfo').style.display = 'none';
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+        }
+
+        function showNoResultsState() {
+            document.getElementById('searchInfo').style.display = 'none';
+            document.getElementById('loadingIndicator').style.display = 'none';
+            document.getElementById('searchResults').style.display = 'none';
+            document.getElementById('noResults').style.display = 'block';
+        }
+        
+        if (resultsParam) {
+            // New format: display search results from Trendyol and Zara
+            // Parse directly if from sessionStorage, decode if from URL
+            const searchData = resultsParam.startsWith('{') || resultsParam.startsWith('[') 
+                ? JSON.parse(resultsParam) 
+                : JSON.parse(decodeURIComponent(resultsParam));
+            displaySearchResults(searchData);
+            
+            // Clean up sessionStorage after use
+            sessionStorage.removeItem('searchResults');
+            sessionStorage.removeItem('searchImageUrl');
+        } else if (itemsParam) {
+            // Old format: display analyzed clothing items with Turkish descriptions
+            displayTurkishAnalysis(JSON.parse(decodeURIComponent(itemsParam)));
+        } else {
+            // Oldest format: display search info and perform searches
+            document.getElementById('searchQuery').textContent = query;
+            document.getElementById('detectedColors').textContent = `Detected colors: ${colors}`;
+            showLoadingState();
+            performGoogleSearches();
+        }
+        
+        async function performGoogleSearches() {
+            // Simulate loading time
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Define clothing items to search for
+            const clothingItems = [
+                { name: 'Blazer', en: 'blazer', tr: 'ceket' },
+                { name: 'Shirt', en: 'shirt', tr: 'gömlek' },
+                { name: 'Trousers', en: 'trousers', tr: 'pantolon' },
+                { name: 'Shoes', en: 'shoes', tr: 'ayakkabı' },
+                { name: 'Belt', en: 'belt', tr: 'kemer' }
+            ];
+
+            // Define sites to search
+            const sites = [
+                { name: 'Trendyol', domain: 'trendyol.com.tr' },
+                { name: 'Hepsiburada', domain: 'hepsiburada.com' },
+                { name: 'Amazon TR', domain: 'amazon.com.tr' },
+                { name: 'LC Waikiki', domain: 'lcwaikiki.com' },
+                { name: 'Koton', domain: 'koton.com' }
+            ];
+
+            if (clothingItems.length > 0) {
+                showResultsState();
+                
+                let html = '';
+                for (const item of clothingItems) {
+                    html += `
+                        <div class="item-group">
+                            <h2 class="item-title">${item.name}</h2>
+                            <div class="item-details">
+                                <p><strong>Type:</strong> ${item.en}</p>
+                                <p><strong>Turkish:</strong> ${item.tr}</p>
+                            </div>
+                            <div class="site-results">
+                                <h3>Mağaza Arama Sonuçları:</h3>
+                    `;
+                    
+                    // Show first 2 search results for each item
+                    const limitedSites = sites.slice(0, 2);
+                    
+                    limitedSites.forEach(site => {
+                        const searchQuery = generateSearchQuery(item, site, colors);
+                        const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`;
+                        
+                        html += `
+                            <div class="site-result">
+                                <h4>${site.name}</h4>
+                                <a href="${googleSearchUrl}" target="_blank" class="search-link">
+                                    ${site.name}'da Ara
+                                </a>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('searchResults').innerHTML = html;
+            } else {
+                showNoResultsState();
+            }
+        }
+        
+        function generateSearchQuery(item, site, colors) {
+            const colorTerms = colors.split(' ').filter(c => c.trim());
+            const itemTerms = [item.en, item.tr];
+            const searchTerms = [...colorTerms, ...itemTerms];
+            
+            return `site:${site.domain} ${searchTerms.join(' ')} erkek`;
+        }
+        
+        function displayTurkishAnalysis(analysisData) {
+            if (analysisData.items && analysisData.items.length > 0) {
+                showResultsState();
+                
+                let html = '';
+                for (const item of analysisData.items) {
+                    html += `
+                        <div class="item-group">
+                            <h2 class="item-title">${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</h2>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('searchResults').innerHTML = html;
+            } else {
+                showNoResultsState();
+            }
+        }
+        
+        function displaySearchResults(searchData) {
+            if (searchData.searchResults && searchData.searchResults.length > 0) {
+                showResultsState();
+                
+                // Add gender info at the top
+                let html = '';
+                if (searchData.gender) {
+                    html += `
+                        <div class="gender-info">
+                            <h2>Cinsiyet: ${searchData.gender.charAt(0).toUpperCase() + searchData.gender.slice(1)}</h2>
+                        </div>
+                    `;
+                }
+                
+                // Find the first Trendyol link to auto-open
+                let firstTrendyolUrl = null;
+                
+                for (const itemResult of searchData.searchResults) {
+                    const item = itemResult.item;
+                    const searches = itemResult.searchResults;
+                    
+                    // Get the first Trendyol URL if we haven't found one yet
+                    if (!firstTrendyolUrl) {
+                        const trendyolSearch = searches.find(s => s.site === 'Trendyol');
+                        if (trendyolSearch) {
+                            firstTrendyolUrl = trendyolSearch.searchUrl;
+                        }
+                    }
+                    
+                    html += `
+                        <div class="item-group">
+                            <h2 class="item-title">${item.type.charAt(0).toUpperCase() + item.type.slice(1)}</h2>
+                            <div class="site-results">
+                                <h3>Mağaza Arama Sonuçları:</h3>
+                    `;
+                    
+                    searches.forEach(search => {
+                        html += `
+                            <div class="site-result">
+                                <h4>${search.site}</h4>
+                                <div class="search-query-display">
+                                    <small>Arama: ${search.query}</small>
+                                </div>
+                                <a href="${search.searchUrl}" target="_blank" class="search-link">
+                                    ${search.site}'da Ara
+                                </a>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('searchResults').innerHTML = html;
+                
+                // Auto-open the first Trendyol link
+                if (firstTrendyolUrl) {
+                    setTimeout(() => {
+                        window.open(firstTrendyolUrl, '_blank');
+                    }, 500); // Small delay to ensure page is fully loaded
+                }
+            } else {
+                showNoResultsState();
+            }
+        }
+        
+        function searchSuggestion(term) {
+            const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(term)}`;
+            window.open(searchUrl, '_blank');
+        }
+        
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

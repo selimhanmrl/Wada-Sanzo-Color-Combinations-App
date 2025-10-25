@@ -1,5 +1,223 @@
+// Track API calls
+const trackAPI = {
+    async trackVisit(userId) {
+        try {
+            await fetch('/api/track/visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId })
+            });
+        } catch (error) {
+            console.error('Error tracking visit:', error);
+        }
+    },
+
+    async trackColorSelection(colorData, userId) {
+        try {
+            await fetch('/api/track/color', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ colorData, userId })
+            });
+        } catch (error) {
+            console.error('Error tracking color selection:', error);
+        }
+    },
+
+    async trackCombinationSelection(combinationIndex, colors, userId) {
+        try {
+            await fetch('/api/track/combination', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ combinationIndex, colors, userId })
+            });
+        } catch (error) {
+            console.error('Error tracking combination selection:', error);
+        }
+    }
+};
+
+// Load popular colors from database API
+async function loadPopularColors() {
+    try {
+        // Fetch REAL popular colors from database
+        const response = await fetch('/api/popular-colors', {
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to fetch popular colors');
+        }
+        
+        const data = await response.json();
+        let popularColors = data.popularColors || [];
+        
+        
+        // Merge with full color data to get combinations property
+        if (window.colorData && Array.isArray(window.colorData)) {
+            popularColors = popularColors.map(popularColor => {
+                
+                // Try both exact match and type-coerced match
+                let fullColorData = window.colorData.find(c => c.index === popularColor.index);
+                
+                // If not found, try converting types
+                if (!fullColorData) {
+                    const indexAsNumber = parseInt(popularColor.index);
+                    fullColorData = window.colorData.find(c => c.index === indexAsNumber);
+                }
+                return fullColorData ? { ...fullColorData, selectionCount: popularColor.selectionCount } : popularColor;
+            });
+        } else {
+            console.warn('window.colorData not available yet! Popular colors will not have combinations.');
+        }
+        
+        displayPopularColors(popularColors);
+    } catch (error) {
+        console.error('Error loading popular colors:', error);
+        // Show fallback message
+        const popularGrid = document.getElementById('popular-colors-grid');
+        if (popularGrid) {
+            popularGrid.innerHTML = `
+                <div class="no-popular-colors">
+                    <p>Popular colors will appear here as users discover their favorites.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Display popular colors
+function displayPopularColors(popularColors) {
+    const popularGrid = document.getElementById('popular-colors-grid');
+    if (!popularGrid) return;
+
+    if (!popularColors || popularColors.length === 0) {
+        popularGrid.innerHTML = `
+            <div class="no-popular-colors">
+                <p>Popular colors will appear here as users discover their favorites.</p>
+            </div>
+        `;
+        return;
+    }
+
+    popularGrid.innerHTML = popularColors.map((color, idx) => `
+        <div class="popular-color-item" data-color-index-ref="${idx}">
+            <div class="popular-color-swatch" style="background-color: ${color.hex}"></div>
+            <div class="popular-color-name">${color.name}</div>
+            <div class="popular-color-count">${color.selectionCount || 0} selections</div>
+        </div>
+    `).join('');
+
+    // Store popularColors for later access
+    window.popularColorsData = popularColors;
+
+    // Add click listeners to popular color items
+    popularGrid.querySelectorAll('.popular-color-item').forEach((item, idx) => {
+        item.addEventListener('click', () => {
+            const colorData = window.popularColorsData[idx];
+            // Open the modal instead of inline preview
+            showCombinations(colorData);
+        });
+    });
+}
+
+// Load popular combinations from database
+async function loadPopularCombinations() {
+    try {
+        const response = await fetch('/api/popular-combinations', {
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            throw new Error('Failed to fetch popular combinations');
+        }
+        
+        const data = await response.json();
+        displayPopularCombinations(data.popularCombinations);
+    } catch (error) {
+        console.error('Error loading popular combinations:', error);
+        // Show fallback message
+        const popularCombinationsGrid = document.getElementById('popular-combinations-grid');
+        if (popularCombinationsGrid) {
+            popularCombinationsGrid.innerHTML = `
+                <div class="no-popular-colors">
+                    <p>Popular combinations will appear here as users discover their favorites.</p>
+                </div>
+            `;
+        }
+    }
+}
+
+// Display popular combinations
+function displayPopularCombinations(popularCombinations) {
+    const popularCombinationsGrid = document.getElementById('popular-combinations-grid');
+    if (!popularCombinationsGrid) return;
+
+    if (!popularCombinations || popularCombinations.length === 0) {
+        popularCombinationsGrid.innerHTML = `
+            <div class="no-popular-colors">
+                <p>Popular combinations will appear here as users discover their favorites.</p>
+            </div>
+        `;
+        return;
+    }
+
+    popularCombinationsGrid.innerHTML = popularCombinations.map(combination => {
+        // Get the actual combination data from the loaded JSON
+        const combinationData = window.allRecommendations && window.allRecommendations[combination.combinationIndex];
+        
+        // Handle the JSON structure which has names and codes arrays
+        let colors = [];
+        if (combinationData) {
+            if (combinationData.names && combinationData.codes) {
+                // Convert RGB codes to hex values
+                colors = combinationData.codes.map((code, index) => {
+                    const rgbMatch = code.match(/R:(\d+)\s*\/\s*G:(\d+)\s*\/\s*B:(\d+)/);
+                    if (rgbMatch) {
+                        const r = parseInt(rgbMatch[1]);
+                        const g = parseInt(rgbMatch[2]);
+                        const b = parseInt(rgbMatch[3]);
+                        const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+                        return {
+                            name: combinationData.names[index] || 'Unknown',
+                            hex: hex
+                        };
+                    }
+                    return { name: 'Unknown', hex: '#ffffff' };
+                });
+            } else if (combinationData.colors) {
+                // Fallback to colors array if it exists
+                colors = combinationData.colors;
+            }
+        }
+        
+        return `
+            <div class="popular-combination-item">
+                <div class="popular-combination-colors">
+                    ${colors && colors.length > 0 ? 
+                        colors.map(color => `
+                            <div class="popular-combination-color" style="background-color: ${color.hex || '#ffffff'}" title="${color.name || 'Unknown'}"></div>
+                        `).join('') : 
+                        '<div class="popular-combination-color" style="background-color: #cccccc" title="No colors available"></div>'
+                    }
+                </div>
+                <div class="combination-number">Combination #${combination.combinationIndex}</div>
+                <div class="popular-combination-info">
+                    <div class="popular-combination-count">${combination.selectionCount} selections</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // No click listeners - combinations are display-only
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
+        // Track visit
+        await trackAPI.trackVisit();
+        
+        // Load popular colors after main data is loaded
+        
         // Load both color data files
         console.log('Loading color data...');
         console.log('Fetching files...');
@@ -36,6 +254,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedColorName = document.getElementById('selected-color-name');
         const combinationsGrid = document.getElementById('combinations-grid');
         
+        if (!colorClosetGrid || !combinationsModal || !selectedColorName || !combinationsGrid) {
+            throw new Error('Required DOM elements not found');
+        }
+
         // Set up modal close button
         const closeButton = document.querySelector('.close-modal');
         closeButton.addEventListener('click', () => {
@@ -54,9 +276,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (e.key === 'Escape' && !combinationsModal.classList.contains('hidden')) {
                 combinationsModal.classList.add('hidden');
             }
-        });        if (!colorClosetGrid || !combinationsModal || !selectedColorName || !combinationsGrid) {
-            throw new Error('Required DOM elements not found');
-        }
+        });
 
         // Create color boxes for the main grid
         colors.forEach(color => {
@@ -64,9 +284,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             colorClosetGrid.appendChild(colorBox);
         });
         console.log('Successfully created color grid');
+        
+        // Store the data globally for use in popular combinations
+        window.allRecommendations = combinations;
+        window.colorData = colors;
+        console.log('Data stored globally - combinations:', combinations.length, 'colors:', colors.length);
 
         function createColorBox(color, isInCombination = false) {
             const container = document.createElement('div');
+            container.className = 'color-card-container';
             container.style.display = 'flex';
             container.style.flexDirection = 'column';
             container.style.alignItems = 'center';
@@ -96,15 +322,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             container.appendChild(info);
 
             // Add click event to show combinations
-            box.addEventListener('click', () => showCombinations(color));
+            box.addEventListener('click', () => {
+                // Remove selected class from all boxes
+                document.querySelectorAll('.color-box').forEach(box => {
+                    box.classList.remove('selected');
+                });
+                // Add selected class to clicked box
+                box.classList.add('selected');
+                showCombinations(color);
+            });
 
             return container;
         }
 
         function showCombinations(color) {
             console.log('Showing combinations for color:', color);
+            // Track color selection
+            trackAPI.trackColorSelection(color);
+            
             selectedColorName.textContent = color.name;
             combinationsGrid.innerHTML = '';
+            
+            // Update the combinations preview area
+            updateCombinationsPreview(color);
 
             // Add the close button to the modal
             const closeButton = document.createElement('button');
@@ -141,6 +381,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Get all combination numbers
             console.log('Color combinations:', color.combinations);
+            
+            // Check if combinations exist
+            if (!color.combinations || !Array.isArray(color.combinations)) {
+                const noCombo = document.createElement('div');
+                noCombo.className = 'no-combinations';
+                noCombo.textContent = 'No combinations available for this color';
+                combinationsGrid.appendChild(noCombo);
+                return;
+            }
             
             const validCombinations = color.combinations.filter(combIndex => {
                 const exists = combinations[combIndex];
@@ -181,7 +430,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     comboPreview.className = 'combination-preview';
                     
                     // Create the color strip with all colors in the combination
-                    // Create color blocks instead of gradient
                     const colorStrip = document.createElement('div');
                     colorStrip.className = 'color-strip';
                     colorStrip.style.display = 'flex';
@@ -194,7 +442,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const rgb = rgbCode.match(/R:(\d+) \/ G:(\d+) \/ B:(\d+)/);
                         const colorBlock = document.createElement('div');
                         colorBlock.style.flex = '1';
-                        colorBlock.style.backgroundColor = `rgb(${rgb[1]}, ${rgb[2]}, ${rgb[3]})`;
+                        if (rgb) {
+                            colorBlock.style.backgroundColor = `rgb(${rgb[1]}, ${rgb[2]}, ${rgb[3]})`;
+                        }
                         colorStrip.appendChild(colorBlock);
                     });
 
@@ -235,6 +485,93 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        // Expose showCombinations globally so it can be called from popular colors
+        window.showCombinations = showCombinations;
+
+        // Now load popular colors and combinations after showCombinations is available
+        loadPopularColors().catch(err => console.error('Error loading popular colors:', err));
+        loadPopularCombinations().catch(err => console.error('Error loading popular combinations:', err));
+
+        function updateCombinationsPreview(color) {
+            const combinationsPreview = document.getElementById('combinations-preview');
+            if (!combinationsPreview) return;
+
+            // Check if combinations exist
+            if (!color.combinations || !Array.isArray(color.combinations)) {
+                combinationsPreview.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎨</div>
+                        <h3>No combinations available for ${color.name}</h3>
+                        <p>This color doesn't have any predefined combinations yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Get all combination numbers
+            const validCombinations = color.combinations.filter(combIndex => {
+                const exists = combinations[combIndex];
+                if (!exists) {
+                    console.log('Could not find combination with index:', combIndex);
+                }
+                return exists;
+            });
+
+            if (validCombinations.length === 0) {
+                combinationsPreview.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🎨</div>
+                        <h3>No combinations found for ${color.name}</h3>
+                        <p>This color doesn't have any predefined combinations yet.</p>
+                    </div>
+                `;
+            } else {
+                // Show preview of combinations
+                combinationsPreview.innerHTML = `
+                    <div class="combinations-preview-content">
+                        <h3>Perfect Combinations with ${color.name}</h3>
+                        <p>${validCombinations.length} harmonious combinations available</p>
+                        <div class="preview-combinations">
+                            ${validCombinations.slice(0, 3).map(combIndex => {
+                                const combinationSet = combinations[combIndex];
+                                return `
+                                    <div class="preview-combination" onclick="showCombinations(${JSON.stringify(color).replace(/"/g, '&quot;')})">
+                                        <div class="preview-color-strip">
+                                            ${combinationSet.codes.map(rgbCode => {
+                                                const rgb = rgbCode.match(/R:(\d+) \/ G:(\d+) \/ B:(\d+)/);
+                                                if (rgb) {
+                                                    return `<div style="background-color: rgb(${rgb[1]}, ${rgb[2]}, ${rgb[3]}); height: 40px; flex: 1;"></div>`;
+                                                }
+                                                return '';
+                                            }).join('')}
+                                        </div>
+                                        <div class="preview-combination-info">
+                                            <span>Combination ${combIndex}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <button class="view-all-combinations" data-color-name="${color.name}" data-color-hex="${color.hex}" data-color-index="${color.index}">
+                            View All ${validCombinations.length} Combinations
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // Add event listener for View All Combinations button
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('view-all-combinations')) {
+                const colorData = {
+                    name: e.target.dataset.colorName,
+                    hex: e.target.dataset.colorHex,
+                    index: parseInt(e.target.dataset.colorIndex)
+                };
+                showCombinations(colorData);
+            }
+        });
+
     } catch (error) {
         console.error('Error:', error);
         // Display error message on the page
@@ -246,15 +583,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorDiv.style.borderRadius = '8px';
         errorDiv.style.margin = '20px 0';
         errorDiv.innerHTML = `
-            <h3>Error Loading Colors</h3>
+            <h3>Error Loading Application</h3>
             <p>${error.message}</p>
-            <p>Please make sure:</p>
-            <ul>
-                <li>The color.json file exists in the same directory as index.html</li>
-                <li>You're running the page through a web server (not directly opening the file)</li>
-                <li>The color.json file contains valid JSON data</li>
-            </ul>
         `;
         main.appendChild(errorDiv);
     }
 });
+

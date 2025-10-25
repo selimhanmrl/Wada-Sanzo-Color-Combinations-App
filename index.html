@@ -8,13 +8,64 @@
 </head>
 <body>
     <header>
-        <h1>Palette Stylist</h1>
+        <h1>色合わせの芸術</h1>
+        <p class="subtitle">Color Harmony Artistry</p>
         <p>Click a color to build your perfect outfit palette.</p>
+        <div class="header-actions">
+            <a href="analyzer" class="analyze-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                    <circle cx="12" cy="13" r="4"/>
+                </svg>
+                Analyze Your Outfit Colors
+            </a>
+        </div>
     </header>
 
     <main>
-        <h2>Your Color Closet</h2>
-        <div id="color-closet-grid" class="color-grid"></div>
+        <!-- Popular Colors Section -->
+        <section class="popular-colors-section">
+            <div class="popular-colors-container">
+                <h2>🌟 Most Popular Colors</h2>
+                <p>Discover the colors most loved by our community</p>
+                <div id="popular-colors-grid" class="popular-colors-grid">
+                    <div class="loading-popular">
+                        <div class="spinner-small"></div>
+                        <span>Loading popular colors...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Popular Combinations Section -->
+        <section class="popular-combinations-section">
+            <div class="popular-combinations-container">
+                <h2>🎨 Most Popular Combinations</h2>
+                <p>See the color combinations most chosen by our community</p>
+                <div id="popular-combinations-grid" class="popular-combinations-grid">
+                    <div class="loading-popular">
+                        <div class="spinner-small"></div>
+                        <span>Loading popular combinations...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Color Grid Section -->
+        <section class="main-color-section">
+            <div class="color-grid-container">
+                <div id="color-closet-grid" class="color-grid"></div>
+            </div>
+            
+            <!-- Empty state for combinations -->
+            <div id="combinations-preview" class="combinations-preview">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🎨</div>
+                    <h3>Select a base color to see perfect combinations</h3>
+                    <p>Click any color from the grid above to discover harmonious color palettes inspired by Sanzo Wada's work.</p>
+                </div>
+            </div>
+        </section>
         
         <!-- Modal Popup for combinations -->
         <div id="combinations-modal" class="modal hidden">
@@ -30,7 +81,21 @@
             </div>
         </div>
     </main>
+    
+    <!-- Footer with About Section -->
+    <footer>
+        <section class="inspiration-section">
+            <h2>Inspired by a Master</h2>
+            <div class="inspiration-content">
+                <p>This project is a heartfelt tribute to the pioneering work of Sanzo Wada (1883-1967), a Japanese artist, teacher, and costume designer whose influence on color theory is immeasurable.</p>
+                <p>Our color combinations and analysis are directly inspired by his seminal work, <strong>"Haishoku Sōkan" (A Dictionary of Color Combinations)</strong>. Wada's methodical yet beautiful approach to color harmony serves as the foundation for the palettes you see here. We aim to bring his timeless vision to a modern audience, celebrating the enduring power of thoughtful color selection.</p>
+            </div>
+        </section>
+    </footer>
 
+    
     <script src="app.js"></script>
+    
 </body>
 </html>
+

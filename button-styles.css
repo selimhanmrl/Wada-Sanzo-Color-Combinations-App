@@ -1,0 +1,45 @@
+.header-actions {
+    margin-top: 20px;
+}
+
+.analyze-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #2196F3;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+}
+
+.analyze-button:hover {
+    transform: translateY(-2px);
+    background: #1976D2;
+    box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
+}
+
+.analyze-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+/* Add a pulsing animation to draw attention */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 20px rgba(33, 150, 243, 0.5);
+    }
+    100% {
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+}
+
+.analyze-button {
+    animation: pulse 2s infinite;
+}

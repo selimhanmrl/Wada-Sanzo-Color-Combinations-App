@@ -10,8 +10,8 @@
 <body>
     <header>
         <nav class="main-nav">
-            <a href="index.html" class="nav-link">Color Combinations</a>
-            <a href="analyzer.html" class="nav-link active">Outfit Analyzer</a>
+            <a href="combinations" class="nav-link">Color Combinations</a>
+            <a href="analyzer" class="nav-link active">Outfit Analyzer</a>
         </nav>
         <h1>Outfit Color Analyzer</h1>
         <p class="header-description">Upload your clothing image to get color combination recommendations</p>
@@ -33,29 +33,131 @@
                     </div>
                     <img id="previewImage" class="hidden">
                 </div>
-                <button id="analyzeButton" class="analyze-btn" disabled>Analyze Colors</button>
+                <div class="button-container">
+                    <button id="analyzeButton" class="analyze-btn">Analyze Colors</button>
+                   
+                    <div class="generation-section hidden" id="generationSection">
+                        <button id="generateButton" class="analyze-btn" disabled>Generate New Outfit</button>
+                    </div>
+                    <button id="galleryButton" class="gallery-button" title="View My Generated Outfits">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <span>My Gallery (<span id="galleryCount">0</span>)</span>
+                    </button>
+                </div>
+        
             </div>
 
             <div class="results-section hidden" id="resultsSection">
-                <div class="detected-colors">
-                    <h2>Detected Colors</h2>
-                    <div id="detectedColorsList" class="color-list"></div>
+                <div class="left-panel">
+                    <div class="detected-colors">
+                        <h2>Detected Colors</h2>
+                        <p>Select clothes to <b>keep</b> in the new image:</p>
+                        <div id="detectedColorsList" class="color-list"></div>
+                    </div>
+                    
+                    <div class="style-preferences">
+                        <h2>Style Preferences</h2>
+                        <p>Choose the style you want for your outfit:</p>
+                        <div class="style-options">
+                            <label class="style-option">
+                                <input type="radio" name="style" value="casual" checked>
+                                <span class="style-label">Casual</span>
+                            </label>
+                            <label class="style-option">
+                                <input type="radio" name="style" value="formal">
+                                <span class="style-label">Formal</span>
+                            </label>
+                            <label class="style-option">
+                                <input type="radio" name="style" value="business">
+                                <span class="style-label">Business</span>
+                            </label>
+                            <label class="style-option">
+                                <input type="radio" name="style" value="sporty">
+                                <span class="style-label">Sporty</span>
+                            </label>
+                            <label class="style-option">
+                                <input type="radio" name="style" value="elegant">
+                                <span class="style-label">Elegant</span>
+                            </label>
+                            <label class="style-option">
+                                <input type="radio" name="style" value="vintage">
+                                <span class="style-label">Vintage</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="recommended-combinations">
-                    <h2>Recommended Combinations</h2>
-                    <div id="recommendationsList" class="combinations-grid"></div>
+                <div class="right-panel">
+                    <div class="recommended-combinations">
+                        <h2>Recommended Combinations</h2>
+                        <p>Select a combination to generate a new outfit:</p>
+                        <div id="recommendationsList" class="combinations-grid"></div>
+                    </div>
                 </div>
             </div>
 
+
+
             <div id="loadingIndicator" class="loading hidden">
                 <div class="spinner"></div>
-                <p>Analyzing your image...</p>
+                <p>Detecting colors your on your outfit...</p>
             </div>
         </div>
     </main>
 
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <div id="imagePopupModal" class="modal hidden">
+        <div class="modal-content image-popup-content">
+            <button id="closePopupBtn" class="close-modal">&times;</button>
+            <h2>Your New Outfit</h2>
+            <img id="popupImage" src="" alt="Generated Outfit">
+            <div class="image-actions">
+                <button id="downloadButton" class="download-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Download Image
+                </button>
+                <button id="searchButton" class="search-btn" onclick="handleSearchClick()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    Search Similar Items
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gallery Modal -->
+    <div id="galleryModal" class="modal hidden">
+        <div class="modal-content gallery-modal-content">
+            <button id="closeGalleryBtn" class="close-modal">&times;</button>
+            <h2>🖼️ My Generated Outfits</h2>
+            <p class="gallery-description">All outfits generated in this session</p>
+            <div id="galleryGrid" class="gallery-grid">
+                <div class="gallery-loading">
+                    <div class="spinner"></div>
+                    <p>Loading your outfits...</p>
+                </div>
+            </div>
+            <div id="galleryEmpty" class="gallery-empty hidden">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
+                </svg>
+                <p>No generated outfits yet</p>
+                <span>Generate your first outfit to see it here!</span>
+            </div>
+        </div>
+    </div>
+
     <script src="analyzer.js"></script>
 </body>
 </html>
